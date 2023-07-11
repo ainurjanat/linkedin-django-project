@@ -41,3 +41,31 @@ def post_detail(request, post_id):
     comments = post.comments.all()
     context = {'post':post, 'comments': comments}
     return render(request, 'post_detail.html', context)
+
+@login_required
+def create_comment(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    if request.method == 'POST':
+        content = request.POST['content']
+        comment = Comment(post=post, author=request.user, content=content)
+        comment.save()
+        return redirect('post_detail', post_id=post_id)
+    return redirect('home')
+
+@login_required
+def like_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    if request.user in post.likes.all():
+        post.likes.revome(request.user)
+    else:
+        post.likes.add(request.user)
+    return redirect('post_detail', post_id=post_id)
+
+@login_required
+def like_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if request.user in comment.likes.all():
+        comment.likes.remove(request.user)
+    else:
+        comment.likes.add(request.user)
+    return redirect('post_detail', post_id=comment.post.id)
