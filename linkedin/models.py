@@ -12,6 +12,23 @@ class User(models.Model):
     def __str__(self):
         return self.username
     
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    full_name = {User.first_name} + {User.last_name}
+    headline = models.CharField(max_length=200)
+    bio = models.TextField()
+
+    def __str__(self):
+        return self.full_name
+    
+class Connection(models.Model):
+    sender = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='sent_connections')
+    receiver = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='received_connections')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sender} -> {self.receiver}"
+    
 class Post(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
